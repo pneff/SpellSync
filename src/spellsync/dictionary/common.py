@@ -10,19 +10,16 @@ class CommonDictionary(Dictionary):
     """
 
     PATH = xdg_data_home() / "spellsync/dictionary"
-
-    def __init__(self) -> None:
-        super().__init__()
-        if self.is_present():
-            with self.PATH.open() as f:
-                for line in f:
-                    self.words.add(line.strip())
-
-    @staticmethod
-    def is_present() -> bool:
-        """Return True if a dictionary was found on the system."""
-        return CommonDictionary.PATH.exists()
+    TYPE_NAME = "common"
 
     def add_words(self, dictionary: Dictionary) -> None:
+        """Add all the words from the given dictionary to this one."""
         for word in dictionary:
-            self.words.add(word)
+            if word not in self.words:
+                self.words.add(word)
+                self.changes = True
+
+    def write(self, force: bool = False) -> bool:
+        if not self.exists():
+            self.full_path().parent.mkdir(parents=True, exist_ok=True)
+        return super().write()
