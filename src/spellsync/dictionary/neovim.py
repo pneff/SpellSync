@@ -13,6 +13,12 @@ class NeovimDictionary(Dictionary):
 
     PATH = xdg_config_home() / "nvim/spell/en.utf-8.add"
 
+    def __init__(self) -> None:
+        super().__init__()
+        with self.PATH.open("r") as f:
+            for line in f:
+                self.words.add(line.strip())
+
     @staticmethod
     def is_present() -> bool:
         """Return True if a dictionary was found on the system."""

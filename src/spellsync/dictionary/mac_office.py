@@ -8,6 +8,12 @@ class MacOfficeDictionary(Dictionary):
 
     PATH = Path("~/Library/Group Containers/UBF8T346G9.Office/Custom Dictionary")
 
+    def __init__(self) -> None:
+        super().__init__()
+        with self.full_path().open("r", encoding="utf-16") as f:
+            for line in f:
+                self.words.add(line.strip())
+
     @staticmethod
     def full_path() -> Path:
         return MacOfficeDictionary.PATH.expanduser()
