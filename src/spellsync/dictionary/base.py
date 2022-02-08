@@ -53,9 +53,13 @@ class Dictionary:
                 for word in sorted(self.words):
                     f.write(word)
                     f.write("\n")
+            self.after_write()
             return True
         else:
             return False
+
+    def after_write(self) -> None:
+        """Hook invoked after the file has been updated."""
 
     def backup(self) -> Optional[Path]:
         """Create a backup of the file."""
