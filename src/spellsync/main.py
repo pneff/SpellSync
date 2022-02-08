@@ -13,8 +13,10 @@ def find_dictionaries() -> List[Dictionary]:
     ret: List[Dictionary] = []
 
     for DictionaryClass in all_dictionary_classes:
-        if DictionaryClass.exists():
-            ret.append(DictionaryClass())
+        if DictionaryClass.instantiate():
+            instance = DictionaryClass()
+            echo(f"Checking {instance.TYPE_NAME} dictionary at {instance.full_path()}")
+            ret.append(instance)
 
     return ret
 
@@ -36,7 +38,9 @@ def main(ctx: click.Context, no_op: bool, backup: bool) -> None:
 
     common = CommonDictionary()
     for dictionary in dictionaries:
-        common.add_words(dictionary)
+        new_words = common.add_words(dictionary)
+        if new_words:
+            echo(f"New words received from {dictionary.TYPE_NAME}: {new_words}")
     echo(f"Merged into common dictionary - {len(common)} words total")
 
     if not no_op:
@@ -44,13 +48,16 @@ def main(ctx: click.Context, no_op: bool, backup: bool) -> None:
             common.backup()
         echo(f"Storing common dictionary in {common.full_path()}")
         if not common.write():
-            echo(f"  - No changes")
+            echo("  - No changes")
 
     for dictionary in dictionaries:
         dictionary.replace_words(common)
         if not no_op:
             if backup:
                 backup_file = dictionary.backup()
-                echo(f"Backed up {dictionary.TYPE_NAME} to {backup_file}")
-            if not dictionary.write():
+                if backup_file:
+                    echo(f"Backed up {dictionary.TYPE_NAME} to {backup_file}")
+            if dictionary.write():
+                echo(f"Wrote changes for {dictionary.TYPE_NAME}")
+            else:
                 echo(f"No changes for {dictionary.TYPE_NAME}")

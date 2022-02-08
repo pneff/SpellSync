@@ -1,7 +1,7 @@
 import datetime
 import shutil
 from pathlib import Path
-from typing import Generator
+from typing import IO, Any, Generator, Optional
 
 from xdg import xdg_state_home
 
@@ -20,22 +20,36 @@ class Dictionary:
         self.words = set()
 
         if self.exists():
-            with self.full_path().open("r", encoding=self.ENCODING) as f:
-                for line in f:
-                    self.words.add(line.strip())
+            self.read()
 
     @classmethod
     def full_path(cls) -> Path:
         return cls.PATH.expanduser()
 
     @classmethod
+    def instantiate(cls) -> bool:
+        """Decide whether this class should be instantiated.
+
+        This is usually done if the dictionary file can be found.
+        """
+        return cls.exists()
+
+    @classmethod
     def exists(cls) -> bool:
         """Return True if a dictionary was found on the system."""
-        return cls.full_path().exists()
+        try:
+            return cls.full_path().exists()
+        except FileNotFoundError:
+            return False
+
+    def read(self) -> None:
+        with self._open_file("r") as f:
+            for line in f:
+                self.words.add(line.strip())
 
     def write(self, force: bool = False) -> bool:
         if force or self.changes:
-            with self.full_path().open("w", encoding=self.ENCODING) as f:
+            with self._open_file("w") as f:
                 for word in sorted(self.words):
                     f.write(word)
                     f.write("\n")
@@ -43,14 +57,17 @@ class Dictionary:
         else:
             return False
 
-    def backup(self) -> Path:
+    def backup(self) -> Optional[Path]:
         """Create a backup of the file."""
-        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M")
-        backup_folder = xdg_state_home() / f"spellsync/{timestamp}"
-        backup_folder.mkdir(parents=True, exist_ok=True)
-        backup_file = backup_folder / self.TYPE_NAME
-        shutil.copyfile(self.full_path(), backup_file)
-        return backup_file
+        if self.exists():
+            timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M")
+            backup_folder = xdg_state_home() / f"spellsync/{timestamp}"
+            backup_folder.mkdir(parents=True, exist_ok=True)
+            backup_file = backup_folder / self.TYPE_NAME
+            shutil.copyfile(self.full_path(), backup_file)
+            return backup_file
+        else:
+            return None
 
     def __iter__(self) -> Generator[str, None, None]:
         yield from self.words
@@ -67,3 +84,6 @@ class Dictionary:
         if new_words != self.words:
             self.changes = True
             self.words = new_words
+
+    def _open_file(self, mode: str = "r") -> IO[Any]:
+        return self.full_path().open(mode, encoding=self.ENCODING)
