@@ -3,6 +3,20 @@ name = "spellsync"
 version = "0.1.0"
 description = "Synchronise personal spelling dictionaries across applications"
 authors = ["Patrice Neff <mail@patrice.ch>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/pneff/SpellSync"
+repository = "https://github.com/pneff/SpellSync"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "License :: OSI Approved :: BSD License",
+    "Topic :: Text Editors",
+    "Topic :: Utilities",
+]
+include = [
+    "LICENSE",
+]
 
 [tool.poetry.scripts]
 spellsync = "spellsync.main:main"
