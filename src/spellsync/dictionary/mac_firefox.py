@@ -4,7 +4,7 @@ from spellsync.dictionary.base import Dictionary
 
 
 class MacFirefoxDictionary(Dictionary):
-    """Base class for all dictionaries."""
+    """Firefox browser on Mac."""
 
     PATH_PATTERN = "Library/ApplicationSupport/Firefox/Profiles/*/persdict.dat"
     TYPE_NAME = "mac_firefox"

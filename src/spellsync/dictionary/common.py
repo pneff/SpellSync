@@ -4,9 +4,7 @@ from spellsync.dictionary.base import Dictionary
 
 
 class CommonDictionary(Dictionary):
-    """Handle neovim's dictionary.
-
-    Can very easily be re-used for vim, but would have a different path.
+    """The merged dictionary, containing all the SpellSync words.
     """
 
     PATH = xdg_data_home() / "spellsync/dictionary"
